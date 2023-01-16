@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form th:action="@{/documents/find}" method="get">
+        <input type="text" name="message" placeholder="message"><br>
+        <p>Sort by:</p>
+        <input type="radio" name="sort" id="sortDate" value="date">
+        <label for="sortDate">date</label><br>
+        <input type="radio" name="sort" id="sortText" value="message">
+        <label for="sortText">message</label><br>
+        <input type="submit" value="Find">
+    </form>
+
+    <th:block th:each="textDoc : ${pageDocuments}">
+        <div>
+            <p th:text="'ID: ' + ${textDoc.id}"></p>
+            <p th:text="'Message: ' + ${textDoc.message}"></p>
+            <p th:text="'Date: ' + ${textDoc.date}"></p>
+            <hr>
+        </div>
+    </th:block>
+    <th:block th:each="page : ${pageNumbers}">
+        <a th:href="@{/documents/find(page=${page}-1, message=${message}, sort=${sort})}" th:text="${page}"></a>
+    </th:block>
+</body>
+</html>

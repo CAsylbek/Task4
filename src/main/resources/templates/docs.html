@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Task4 docs</title>
+</head>
+<body>
+
+    <form th:action="@{/documents/all}" method="get">
+        <p>Sort by</p>
+        <input type="radio" name="sort" id="sortDate" value="date">
+        <label for="sortDate">date</label><br>
+        <input type="radio" name="sort" id="sortText" value="message">
+        <label for="sortText">message</label><br>
+        <input type="submit" value="Sort">
+    </form>
+    <th:block th:each="textDoc : ${pageDocuments}">
+        <div>
+            <p th:text="'ID: ' + ${textDoc.id}"></p>
+            <p th:text="'Message: ' + ${textDoc.message}"></p>
+            <p th:text="'Date: ' + ${textDoc.date}"></p>
+            <hr>
+        </div>
+    </th:block>
+    <th:block th:each="page : ${pageNumbers}">
+        <a th:href="@{/documents/all(page=${page}-1, sort=${sort})}" th:text="${page}"></a>
+    </th:block>
+</body>
+</html>
