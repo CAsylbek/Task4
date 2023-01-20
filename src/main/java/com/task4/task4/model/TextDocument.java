@@ -1,5 +1,6 @@
 package com.task4.task4.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -8,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Date;
 
 @Document(indexName = "textdoc")
+@Schema(hidden = true)
 public class TextDocument {
 
     @Id

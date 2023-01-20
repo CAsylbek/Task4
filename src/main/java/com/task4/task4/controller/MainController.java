@@ -1,7 +1,9 @@
 package com.task4.task4.controller;
 
 import com.task4.task4.model.TextDocument;
-import com.task4.task4.service.TextDocumentServiceImpl;
+import com.task4.task4.service.TextDocumentService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
@@ -13,17 +15,17 @@ import java.util.stream.IntStream;
 @Controller
 public class MainController {
 
-    final private TextDocumentServiceImpl textDocumentService;
+    final private TextDocumentService textDocumentService;
 
     @Value("${page.size}")
     private int pageSize;
 
-    public MainController(TextDocumentServiceImpl textDocumentService) {
+    public MainController(TextDocumentService textDocumentService) {
         this.textDocumentService = textDocumentService;
     }
 
     @GetMapping("/")
-    public String homePage(Model model) {
+    public String homePage() {
         return "home";
     }
 

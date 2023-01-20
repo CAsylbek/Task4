@@ -1,4 +1,4 @@
-package com.task4.task4;
+package com.task4.task4.config;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -15,7 +15,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.task4.task4.repository")
 @ComponentScan(basePackages = "com.task4.task4")
-public class Config extends AbstractElasticsearchConfiguration {
+public class ElasticConfig extends AbstractElasticsearchConfiguration {
 
     @Value("${elasticsearch.host}")
     private String host;

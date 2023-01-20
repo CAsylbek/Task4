@@ -11,7 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface TextDocumentRepository extends ElasticsearchRepository<TextDocument, String>, CrudRepository<TextDocument, String> {
     Iterable<TextDocument> findByMessage(String message);
 
-    Page<TextDocument> findByMessage(String message, String fieldSort, Pageable pageable);
-
     Page<TextDocument> findAll(Pageable pageable);
 }
