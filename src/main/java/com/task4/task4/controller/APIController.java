@@ -44,7 +44,6 @@ public class APIController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить текстовый документ")
     public void deleteDocuments(@PathVariable String id) {
-        // TODO Сделать возврат TextDocumentDTO
         textDocumentService.deleteById(id);
     }
 
