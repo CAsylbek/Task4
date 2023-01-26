@@ -1,9 +1,8 @@
 package com.task4.task4.controller;
 
 import com.task4.task4.model.TextDocument;
+import com.task4.task4.model.converterToDTO.TextDocumentConvertor;
 import com.task4.task4.service.TextDocumentService;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
@@ -16,12 +15,15 @@ import java.util.stream.IntStream;
 public class MainController {
 
     final private TextDocumentService textDocumentService;
+    final private TextDocumentConvertor convertor;
 
     @Value("${page.size}")
     private int pageSize;
 
-    public MainController(TextDocumentService textDocumentService) {
+    public MainController(TextDocumentService textDocumentService,
+                          TextDocumentConvertor convertor) {
         this.textDocumentService = textDocumentService;
+        this.convertor = convertor;
     }
 
     @GetMapping("/")
@@ -37,9 +39,7 @@ public class MainController {
 
     @PostMapping("/documents/create")
     public String createDocument(Model model, @ModelAttribute("textDocument") TextDocument textDocument) {
-        try {
-            textDocumentService.save(textDocument);
-        } catch (Exception e) {System.out.println(e.getMessage());}
+            textDocumentService.save(convertor.toDTO(textDocument));
         return "createDoc";
     }
 
@@ -50,7 +50,7 @@ public class MainController {
                                 @RequestParam(name = "sort", required = false, defaultValue = "date") String sortProperty) {
 
         Pageable pageable = PageRequest.of(Integer.parseInt(page), pageSize, Sort.by(Sort.Direction.ASC, sortProperty));
-        Page<TextDocument> pageDocuments = textDocumentService.findByMessage(message, sortProperty, pageable);
+        Page<TextDocument> pageDocuments = textDocumentService.findByMessage(message, pageable);
 
         model.addAttribute("pageDocuments", pageDocuments);
         model.addAttribute("pageNumbers", IntStream.rangeClosed(1, pageDocuments.getTotalPages()).toArray());

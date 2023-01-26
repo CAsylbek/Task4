@@ -1,8 +1,6 @@
 package com.task4.task4.controller;
 
-import com.task4.task4.model.DTO.TextDocumentDTO;
-import com.task4.task4.model.TextDocument;
-import com.task4.task4.model.converterToDTO.TextDocumentConvertor;
+import com.task4.task4.model.DTO.TextDocumentDto;
 import com.task4.task4.service.TextDocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/api/v1/documents")
@@ -19,37 +16,45 @@ import java.util.stream.StreamSupport;
 public class APIController {
 
     final private TextDocumentService textDocumentService;
-    final private TextDocumentConvertor textDocumentConvertor;
 
-    public APIController(TextDocumentService textDocumentService,
-                         TextDocumentConvertor textDocumentConvertor) {
+    public APIController(TextDocumentService textDocumentService) {
         this.textDocumentService = textDocumentService;
-        this.textDocumentConvertor = textDocumentConvertor;
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Создать текстовый документ")
-    public TextDocumentDTO postDocuments(@RequestBody TextDocument textDocument) {
-        return textDocumentConvertor.convertToDTO(textDocumentService.save(textDocument));
+    public TextDocumentDto postDocuments(@RequestBody TextDocumentDto textDocumentDTO) {
+        return textDocumentService.save(textDocumentDTO);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Получить текстовый документ")
-    public List<TextDocumentDTO> getDocuments() {
-        return StreamSupport.stream(textDocumentService.findAll().spliterator(), false)
-             .map(textDocumentConvertor::convertToDTO).toList();
+    public List<TextDocumentDto> getDocuments() {
+        return textDocumentService.findAll();
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить текстовый документ")
-    public void deleteDocuments(@PathVariable String id) {
-        textDocumentService.deleteById(id);
+    public TextDocumentDto deleteDocuments(@PathVariable String id) {
+        return textDocumentService.deleteById(id);
     }
 
     @DeleteMapping("/all")
     @Operation(hidden = true)
     public void deleteAll() {
         textDocumentService.deleteAll();
+    }
+
+    @PostMapping(value = "/xml",
+         produces = MediaType.APPLICATION_XML_VALUE,
+         consumes = MediaType.APPLICATION_XML_VALUE)
+    public List<TextDocumentDto> findXmlDocuments(@RequestBody TextDocumentDto textDocumentDto) {
+        try {
+            return textDocumentService.findByMessageXml(textDocumentDto);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

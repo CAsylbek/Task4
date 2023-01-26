@@ -1,6 +1,8 @@
 package com.task4.task4.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -8,12 +10,12 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.Date;
 
-@Document(indexName = "textdoc")
+@Document(indexName = "#{@environment.getProperty('elasticsearch.index')}")
 @Schema(hidden = true)
 public class TextDocument {
 
     @Id
-    @Field(type = FieldType.Text)
+    @Field(name = "_id", type = FieldType.Text)
     private String id;
 
     @Field(type = FieldType.Keyword)

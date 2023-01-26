@@ -1,80 +1,78 @@
 package com.task4.task4.service;
 
+import com.task4.task4.XmlValidator;
+import com.task4.task4.model.DTO.TextDocumentDto;
 import com.task4.task4.model.TextDocument;
+import com.task4.task4.model.converterToDTO.TextDocumentConvertor;
 import com.task4.task4.repository.TextDocumentRepository;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.springframework.beans.support.MutableSortDefinition;
-import org.springframework.beans.support.PagedListHolder;
-import org.springframework.beans.support.SortDefinition;
+import jakarta.xml.bind.JAXBException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.*;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.elasticsearch.index.query.QueryBuilders.regexpQuery;
 
 @Service
 public class TextDocumentService {
 
     final private TextDocumentRepository textDocumentRepository;
-    final private ElasticsearchRestTemplate elasticsearchTemplate;
+    final private TextDocumentConvertor convertor;
 
     public TextDocumentService(TextDocumentRepository textDocumentRepository,
-                               ElasticsearchRestTemplate elasticsearchTemplate) {
+                               TextDocumentConvertor convertor) {
         this.textDocumentRepository = textDocumentRepository;
-        this.elasticsearchTemplate = elasticsearchTemplate;
+        this.convertor = convertor;
     }
 
-    public TextDocument save(TextDocument textDocument) {
-        return textDocumentRepository.save(textDocument);
+    public TextDocumentDto save(TextDocumentDto textDocumentDTO) {
+        TextDocument textDocument = convertor.toEntity(textDocumentDTO);
+        return convertor.toDTO(textDocumentRepository.save(textDocument));
     }
 
-    public Iterable<TextDocument> findByMessage(String message) {
-        return textDocumentRepository.findByMessage(message);
+    public Page<TextDocument> findByMessage(String message, Pageable pageable) {
+        return new PageImpl<>(textDocumentRepository.findByMessageContaining(message, pageable));
     }
 
-    public Page<TextDocument> findByMessage(String message, String fieldSort, Pageable pageable) {
-        Query query = new NativeSearchQueryBuilder()
-                .withFilter(regexpQuery("message", ".*" + message + "*."))
-                .withSort(SortBuilders.fieldSort(fieldSort))
-                .build();
-        SearchHits<TextDocument> searchHits = elasticsearchTemplate.search(query, TextDocument.class, IndexCoordinates.of("textdoc"));
 
-        List<TextDocument> textDocumentList = new ArrayList<>();
-        searchHits.forEach(n -> textDocumentList.add(n.getContent()));
+    public List<TextDocumentDto> findByMessageXml(TextDocumentDto textDocumentDto) throws JAXBException, IOException, SAXException {
+        List<TextDocumentDto> documentsDto = new ArrayList<>();
 
-        PagedListHolder page = new PagedListHolder(textDocumentList);
-        page.setPageSize(pageable.getPageSize());
-        page.setPage(pageable.getPageNumber());
-        SortDefinition sortDefinition = new MutableSortDefinition("message", true, true);
-        page.setSort(sortDefinition);
+        XmlValidator xmlValidator = new XmlValidator(
+             "src/main/resources/static/textDocument.xml",
+             "src/main/resources/static/Schema.xsd");
+        xmlValidator.createXmlFileFromDto(textDocumentDto);
 
-        return new PageImpl<>(page.getPageList(), pageable, textDocumentList.size());
+        if (xmlValidator.isValid()) {
+            TextDocument textDocument = convertor.toEntity(textDocumentDto);
+            List<TextDocument> textDocuments = textDocumentRepository.findByMessageContaining(textDocument.getMessage(), null);
+
+            textDocuments.stream().forEachOrdered(n -> documentsDto.add(convertor.toDTO(n)));
+        } else {
+            return null;
+        }
+
+        return documentsDto;
     }
 
-    public Iterable<TextDocument> findAll() {
-        return textDocumentRepository.findAll();
+    public List<TextDocumentDto> findAll() {
+        List<TextDocumentDto> documentsDTOS = new ArrayList<>();
+        textDocumentRepository.findAll().forEach(t -> documentsDTOS.add(convertor.toDTO(t)));
+        return documentsDTOS;
     }
-
-    public Iterable<TextDocument> findAll(Sort sort) {
-        return textDocumentRepository.findAll(sort);
-    }
-
 
     public Page<TextDocument> findAll(Pageable pageable) {
         return textDocumentRepository.findAll(pageable);
     }
 
-    public void deleteById(String id) {
+    public TextDocumentDto deleteById(String id) {
+        TextDocumentDto dto = convertor.toDTO(textDocumentRepository.findById(id).orElse(null));
         textDocumentRepository.deleteById(id);
+        return dto;
     }
 
     public void deleteAll() {

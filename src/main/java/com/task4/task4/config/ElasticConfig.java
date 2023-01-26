@@ -1,21 +1,21 @@
 package com.task4.task4.config;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.task4.task4.repository")
 @ComponentScan(basePackages = "com.task4.task4")
-public class ElasticConfig extends AbstractElasticsearchConfiguration {
+public class ElasticConfig {
 
     @Value("${elasticsearch.host}")
     private String host;
@@ -24,13 +24,14 @@ public class ElasticConfig extends AbstractElasticsearchConfiguration {
     private int port;
 
     @Bean
-    @Primary
-    public ElasticsearchRestTemplate restTemplate() {
-        return new ElasticsearchRestTemplate(elasticsearchClient());
-    }
+    public ElasticsearchClient elasticsearchClient() {
 
-    @Bean
-    public RestHighLevelClient elasticsearchClient() {
-        return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
+        RestClient httpClient = RestClient.builder(new HttpHost(host, port)).build();
+
+        ElasticsearchTransport transport = new RestClientTransport(httpClient, new JacksonJsonpMapper());
+
+        ElasticsearchClient elasticsearchClient = new ElasticsearchClient(transport);
+
+        return elasticsearchClient;
     }
 }
