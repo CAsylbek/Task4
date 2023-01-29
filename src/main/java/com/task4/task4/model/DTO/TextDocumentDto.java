@@ -2,12 +2,10 @@ package com.task4.task4.model.DTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.util.Date;
 
 @Schema(description = "Информация о текстовом документе")
-@XmlRootElement(name = "textDocument")
 public class TextDocumentDto {
 
     @Schema(description = "Текст")

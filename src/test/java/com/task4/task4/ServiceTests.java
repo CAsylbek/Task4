@@ -2,23 +2,22 @@ package com.task4.task4;
 
 import com.task4.task4.model.DTO.TextDocumentDto;
 import com.task4.task4.service.TextDocumentService;
-import jakarta.xml.bind.JAXBException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -26,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("/application-test.properties")
 public class ServiceTests {
 
-    @Autowired
-    private MockMvc mockMvc;
     @Autowired
     private TextDocumentService textDocumentService;
 
@@ -44,13 +41,10 @@ public class ServiceTests {
 
     @Test
     public void findByMessageXmlPositive() throws Exception {
-        XmlValidator xmlValidator = new XmlValidator(
-             "src/test/resources/static/textDocument.xml",
-             "src/test/resources/static/Schema.xsd");
-        TextDocumentDto dto = xmlValidator.createDtoFromXmlFile();
+        String xml = Files.readString(Paths.get("src/test/resources/static/textDocument.xml"));
 
         List<TextDocumentDto> list = dtoList.subList(1, 3);
-        List<TextDocumentDto> responseList = textDocumentService.findByMessageXml(dto);
+        List<TextDocumentDto> responseList = textDocumentService.findByMessageXml(xml);
 
         if (list.size() == responseList.size()) {
             for (int i = 0; i < list.size(); i++) {
@@ -62,18 +56,16 @@ public class ServiceTests {
 
     @Test
     public void findByMessageXmlNegative() throws Exception{
-        XmlValidator xmlValidator = new XmlValidator(
-             "src/test/resources/static/textDocumentNegative.xml",
-             "src/test/resources/static/Schema.xsd");
-        TextDocumentDto dto = xmlValidator.createDtoFromXmlFile();
+        String xml = Files.readString(Paths.get("src/test/resources/static/textDocumentNegative.xml"));
 
         List<TextDocumentDto> list = dtoList.subList(1, 3);
-        List<TextDocumentDto> responseList = textDocumentService.findByMessageXml(dto);
+        List<TextDocumentDto> responseList = textDocumentService.findByMessageXml(xml);
 
         if (list.size() == responseList.size()) {
             for (int i = 0; i < list.size(); i++) {
                 assertEquals(list.get(i).getText(), responseList.get(i).getText());
                 assertEquals(list.get(i).getDate(), responseList.get(i).getDate());
             }
-        }    }
+        }
+    }
 }

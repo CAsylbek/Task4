@@ -49,9 +49,9 @@ public class APIController {
     @PostMapping(value = "/xml",
          produces = MediaType.APPLICATION_XML_VALUE,
          consumes = MediaType.APPLICATION_XML_VALUE)
-    public List<TextDocumentDto> findXmlDocuments(@RequestBody TextDocumentDto textDocumentDto) {
+    public List<TextDocumentDto> findXmlDocuments(@RequestBody String xml) {
         try {
-            return textDocumentService.findByMessageXml(textDocumentDto);
+            return textDocumentService.findByMessageXml(xml);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

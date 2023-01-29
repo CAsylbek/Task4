@@ -39,18 +39,14 @@ public class TextDocumentService {
     }
 
 
-    public List<TextDocumentDto> findByMessageXml(TextDocumentDto textDocumentDto) throws JAXBException, IOException, SAXException {
+    public List<TextDocumentDto> findByMessageXml(String xml) throws JAXBException, IOException, SAXException {
         List<TextDocumentDto> documentsDto = new ArrayList<>();
 
-        XmlValidator xmlValidator = new XmlValidator(
-             "src/main/resources/static/textDocument.xml",
-             "src/main/resources/static/Schema.xsd");
-        xmlValidator.createXmlFileFromDto(textDocumentDto);
+        XmlValidator xmlValidator = new XmlValidator("src/main/resources/static/Schema.xsd");
 
-        if (xmlValidator.isValid()) {
-            TextDocument textDocument = convertor.toEntity(textDocumentDto);
-            List<TextDocument> textDocuments = textDocumentRepository.findByMessageContaining(textDocument.getMessage(), null);
-
+        if (xmlValidator.isValid(xml)) {
+            String message = xml.split("<text>|</text>")[1];
+            List<TextDocument> textDocuments = textDocumentRepository.findByMessageContaining(message, null);
             textDocuments.stream().forEachOrdered(n -> documentsDto.add(convertor.toDTO(n)));
         } else {
             return null;

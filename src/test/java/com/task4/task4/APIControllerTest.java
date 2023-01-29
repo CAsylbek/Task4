@@ -2,7 +2,6 @@ package com.task4.task4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.task4.task4.model.DTO.TextDocumentDto;
-import com.task4.task4.model.converterToDTO.TextDocumentConvertor;
 import com.task4.task4.repository.TextDocumentRepository;
 import com.task4.task4.service.TextDocumentService;
 import org.junit.Before;
@@ -16,12 +15,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.thymeleaf.spring6.context.SpringContextUtils;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -59,6 +62,7 @@ public class APIControllerTest {
              .content(objectMapper.writeValueAsString(dto)));
 
         response.andExpect(status().isCreated())
+             .andDo(print())
              .andExpect(jsonPath("$.text", is("post document test")));
     }
 
@@ -68,6 +72,7 @@ public class APIControllerTest {
              .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         response.andExpect(status().isOk())
+             .andDo(print())
              .andExpect(jsonPath("$", hasSize(3)))
              .andExpect(jsonPath("$[0].text", is("document 1")));
     }
@@ -80,6 +85,7 @@ public class APIControllerTest {
              .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         response.andExpect(status().isOk())
+             .andDo(print())
              .andExpect(jsonPath("$.text", is("document 1")));
     }
 
@@ -88,19 +94,21 @@ public class APIControllerTest {
         ResultActions response = mockMvc.perform(delete("/api/v1/documents/all")
              .contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        response.andExpect(status().isOk());
+        response.andExpect(status().isOk())
+             .andDo(print());
     }
 
     @Test
     public void findXmlDocuments() throws Exception {
-        TextDocumentDto dto = new TextDocumentDto("test", new Date());
+        String xml = Files.readString(Paths.get("src/test/resources/static/textDocument.xml"));
 
         ResultActions response = mockMvc.perform(post("/api/v1/documents/xml")
              .contentType(MediaType.APPLICATION_XML)
              .accept(MediaType.APPLICATION_XML)
-             .content(new XmlValidator().writeTextDocumentDtoAsString(dto)));
+             .content(xml));
 
         response.andExpect(status().isOk())
+             .andDo(print())
              .andExpect(xpath("List/*").nodeCount(is(2)))
              .andExpect(xpath("List/item[1]/text").string(is("document 2 test")));
     }
