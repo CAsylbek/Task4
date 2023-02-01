@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -49,12 +52,7 @@ public class APIController {
     @PostMapping(value = "/xml",
          produces = MediaType.APPLICATION_XML_VALUE,
          consumes = MediaType.APPLICATION_XML_VALUE)
-    public List<TextDocumentDto> findXmlDocuments(@RequestBody String xml) {
-        try {
-            return textDocumentService.findByMessageXml(xml);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
+    public List<TextDocumentDto> findXmlDocuments(@RequestBody String xml) throws IOException, SAXException, ParserConfigurationException {
+        return textDocumentService.findByMessageXml(xml);
     }
 }

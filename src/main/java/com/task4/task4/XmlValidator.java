@@ -14,24 +14,17 @@ import java.io.StringReader;
 
 public class XmlValidator {
 
-    private String xsdPath;
     private Validator validator;
 
     public XmlValidator(String xsdPath) throws SAXException {
-        this.xsdPath = xsdPath;
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Source schemaFile = new StreamSource(new File(xsdPath));
         Schema schema = factory.newSchema(schemaFile);
         validator = schema.newValidator();
     }
 
-    public boolean isValid(String xml) throws IOException {
-        try {
-            validator.validate(new StreamSource(new StringReader(xml)));
-            return true;
-        } catch (SAXException e) {
-            return false;
-        }
+    public void isValid(String xml) throws IOException, SAXException {
+        validator.validate(new StreamSource(new StringReader(xml)));
     }
 
 }
